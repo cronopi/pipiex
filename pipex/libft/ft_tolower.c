@@ -1,25 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pipex.h                                         :+:      :+:    :+:   */
+/*   ft_tolower.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/01 14:03:18 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/08 15:18:44 by roberto          ###   ########.fr       */
+/*   Created: 2023/01/16 11:39:58 by rcastano          #+#    #+#             */
+/*   Updated: 2023/01/25 17:24:30 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_PIPEX_H
-# define FT_PIPEX_H
+#include "libft.h"
 
-# include <unistd.h>
-# include <stdio.h>
-# include <string.h>
-# include <stdlib.h>
-# include <errno.h>
-# include <sys/wait.h>
-# include "libft/libft.h"
-
-
-#endif
+int	ft_tolower(int c)
+{
+	if (c >= 'A' && c <= 'Z')
+		c = c + 32;
+	return (c);
+}

@@ -1,25 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pipex.h                                         :+:      :+:    :+:   */
+/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/01 14:03:18 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/08 15:18:44 by roberto          ###   ########.fr       */
+/*   Created: 2023/01/16 11:41:38 by rcastano          #+#    #+#             */
+/*   Updated: 2023/01/23 16:25:56 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_PIPEX_H
-# define FT_PIPEX_H
+#include "libft.h"
 
-# include <unistd.h>
-# include <stdio.h>
-# include <string.h>
-# include <stdlib.h>
-# include <errno.h>
-# include <sys/wait.h>
-# include "libft/libft.h"
+void	ft_putstr_fd(char *s, int fd)
+{
+	int	i;
 
+	i = 0;
+	if (!s)
+		return ;
+	while (s[i] != '\0')
+	{
+		write(fd, &s[i], 1);
+		i++;
+	}
+}
 
-#endif
+/* int	main(void)
+{
+	char s[] = "abcd";
+	ft_putstr_fd(s, 1);
+	return (0);
+}
+ */

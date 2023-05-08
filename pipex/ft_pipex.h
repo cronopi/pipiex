@@ -6,7 +6,7 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:03:18 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/08 15:18:44 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/02 14:11:18 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # include <string.h>
 # include <stdlib.h>
 # include <errno.h>
-# include <sys/wait.h>
 # include "libft/libft.h"
 
 

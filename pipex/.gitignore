@@ -1,0 +1,4 @@
+*.o
+pipex
+*.a
+.Ds_Store

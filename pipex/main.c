@@ -6,12 +6,11 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/08 15:24:43 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/08 19:02:28 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
-#include <unistd.h>
 
 //debe utilizar 4 argumentos,
 // 2 archivos
@@ -21,59 +20,35 @@
 // el comando de la izquierda del pipe(output) debe pasarse a la derecha del pipe(como imput) y realizar el comando con "ambos".
 // tengo que abrir el archivo leerlo y antes de salir del programa cerrarlo
 
-void ft_pipex(void)
+void ft_pipex()
 {
-	int		fd[2];
-	pid_t	pid;
-	pid_t	pid2;
-	char*	args[] = { "ls", "-l", NULL };
-	char*	args2[] = { "grep", "libft", NULL };
-	char*	envp[] = { "PATH=/bin", NULL };
 
-	if (pipe(fd) == -1)
-	{
-		perror("Error al crear la tubería");
-		return ;
-	}
-
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("Error al crear el proceso padre-hijo\n");
-		return ;
-	}
-	else if (pid == 0)
-	{
-		printf("Soy el proceso hijo\n");
-		dup2(fd[1], STDOUT_FILENO);
-		close (fd[0]);
-		execve("/bin/ls", args, envp);
-	}
-
-	pid2 = fork();
-	if (pid2 < 0)
-	{
-		perror("Error al crear el proceso padre-hijo\n");
-		return ;
-	}
-	else if (pid2 == 0)
-	{
-		dup2(fd[0], STDIN_FILENO);
-		close (fd[1]);
-		execve("/bin/grep", args2, envp);
-	}
-
-	close (fd[0]);
-	close (fd[1]);
-	waitpid(pid, NULL, 0);
-	waitpid(pid2, NULL, 0);
 }
 
-int main (int argc, char **argv, char **envp)
+int main (int argc, char **argv, char **envp) // ls -l
 {
 	if (argc == 1)
 	{
-		ft_pipex();
+		char	*test;
+		char	*args[] = {"ls", "-l", NULL};
+		int		j;
+
+		j = 0;
+		while(envp[j])
+		{
+			test = ft_strnstr(envp[j], "PATH=", 5);
+			if (test != NULL)
+				break ;
+			j++;
+		}
+		printf("cositas:%s\n", test);
+
+/* 		access("/usr/local/sbin", F_OK);
+			   "/usr/locar/bin" */
+
+		execve("/usr/local/sbin/ls", argv, envp);
+
+		//ft_pipex();
 	}
 	else
 		write(1, "Error", 5);
