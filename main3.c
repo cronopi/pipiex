@@ -1,16 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main3.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/08 19:02:28 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/09 09:16:36 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
+# include <unistd.h>
+# include <stdio.h>
+# include <string.h>
+# include <stdlib.h>
+# include <errno.h>
+# include "libft/libft.h"
 
 //debe utilizar 4 argumentos,
 // 2 archivos
@@ -29,29 +35,43 @@ int main (int argc, char **argv, char **envp) // ls -l
 {
 	if (argc == 1)
 	{
-		char	*test;
+		char	**paths;
+		char	*path;
+		char	*cmd;
 		char	*args[] = {"ls", "-l", NULL};
 		int		j;
+		int test;
 
 		j = 0;
 		while(envp[j])
 		{
-			test = ft_strnstr(envp[j], "PATH=", 5);
-			if (test != NULL)
-				break ;
+			if (ft_strncmp(envp[j], "PATH=", 5) == 0)
+			{
+				path = ft_strdup(envp[j] + 5);
+				break;
+			}
 			j++;
 		}
-		printf("cositas:%s\n", test);
-
-/* 		access("/usr/local/sbin", F_OK);
-			   "/usr/locar/bin" */
-
-		execve("/usr/local/sbin/ls", argv, envp);
-
-		//ft_pipex();
+		j = 0;
+		printf("cositas:%s\n", path);
+		paths = ft_split(path, ':');
+		while (paths[j] != NULL)
+		{
+			paths[j] = ft_strjoin(paths[j], "/ls");
+			printf("%s\n", paths[j]);
+			j++;
+		}
+		j = 0;
+		while (j < 9)
+		{
+			test = access("ls", F_OK);
+			printf("ruta:%s access: %i\n", paths[j], test);
+			execve(paths[j], argv, envp);
+			j++;
+		}
 	}
 	else
-		write(1, "Error", 5);
+		write(1, "error\n", 6);
 	return (0);
 }
 
@@ -234,4 +254,51 @@ int main()
 
 	return 0;
 }
+______________________________________________________
+
+
+Para extraer las diferentes rutas del PATH de la variable envp, puedes seguir los siguientes pasos:
+
+Inicializa un contador i en 0.
+Usa un bucle while para recorrer todos los elementos de envp.
+Para cada elemento de envp, comprueba si comienza con la cadena "PATH=" utilizando la función ft_strncmp. Si es así, has encontrado la variable PATH y puedes salir del bucle.
+Si el elemento no comienza con "PATH=", incrementa el contador i y continúa el bucle.
+Si has encontrado la variable PATH, extrae su valor eliminando los primeros cinco caracteres de la cadena (que corresponden a "PATH=").
+Utiliza la función ft_split para dividir la cadena de rutas del PATH en un arreglo de cadenas utilizando el carácter de dos puntos (:) como separador.
+Aquí está el código para realizar estos pasos:
+
+c
+Copy code
+int		main(int argc, char **argv, char **envp)
+{
+	if (argc == 1)
+	{
+		int		i;
+		char	*path;
+		char	**paths;
+
+		i = 0;
+		while (envp[i] != NULL)
+		{
+			if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+			{
+				path = ft_strdup(envp[i] + 5);
+				break;
+			}
+			i++;
+		}
+		if (envp[i] == NULL)
+			return (-1); // Si no se encuentra la variable PATH, terminamos la ejecución.
+
+		paths = ft_split(path, ':');
+
+		// Ahora puedes recorrer el arreglo `paths` para trabajar con cada ruta del `PATH`.
+		// Recuerda liberar la memoria cuando hayas terminado de trabajar con cada variable.
+
+		free(path);
+		ft_free_split(paths); // Libera la memoria del arreglo `paths`.
+	}
+	else
+		write(1, "Error", 5);
+	return (0);
 */
