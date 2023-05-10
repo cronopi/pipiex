@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main3.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/09 09:16:36 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/05/10 13:41:52 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,13 @@ int main (int argc, char **argv, char **envp) // ls -l
 		char	**paths;
 		char	*path;
 		char	*cmd;
-		char	*args[] = {"ls", "-l", NULL};
+		char	**args;
+		char	carricoche[] = "ls -l -a";
 		int		j;
-		int test;
+		int		test;
 
 		j = 0;
+		args = ft_split(carricoche, ' ');
 		while(envp[j])
 		{
 			if (ft_strncmp(envp[j], "PATH=", 5) == 0)
@@ -53,22 +55,17 @@ int main (int argc, char **argv, char **envp) // ls -l
 			j++;
 		}
 		j = 0;
-		printf("cositas:%s\n", path);
 		paths = ft_split(path, ':');
 		while (paths[j] != NULL)
 		{
-			paths[j] = ft_strjoin(paths[j], "/ls");
-			printf("%s\n", paths[j]);
+			cmd = ft_strjoin("/", args[0]);
+			paths[j] = ft_strjoin(paths[j], cmd);
+			if (access(paths[j], F_OK) == 0)
+				break;
+			printf("esto que imprime muyayo%s\n", paths[j]);
 			j++;
 		}
-		j = 0;
-		while (j < 9)
-		{
-			test = access("ls", F_OK);
-			printf("ruta:%s access: %i\n", paths[j], test);
-			execve(paths[j], argv, envp);
-			j++;
-		}
+		execve(paths[j], args, envp);
 	}
 	else
 		write(1, "error\n", 6);
