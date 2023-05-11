@@ -6,7 +6,7 @@
 /*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/11 11:20:56 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/05/11 11:29:32 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 	pid_t	pid2;
 	int		file_desc;
 	char	**paths;
+	char	**paths2;
 	char	*path;
 	char	*cmd;
 	char	**args;
@@ -92,18 +93,21 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 	}
 	//execve(paths[j], args, envp);
 
+	paths2 = ft_split(path, ':');
 	args2 = ft_split(cmd2, ' ');
 	j = 0;
-	while (paths[j] != NULL)
+	while (paths2[j] != NULL)
 	{
 		cmd2 = ft_strjoin("/", args2[0]);
-		paths[j] = ft_strjoin(paths[j], cmd2);
-		if (access(paths[j], F_OK) == 0)
+		paths2[j] = ft_strjoin(paths2[j], cmd2);
+		if (access(paths2[j], F_OK) == 0)
 			break;
 		//printf("y lo otro que imprime %s\n", paths[j]);
 		j++;
 	}
-	execve(paths[j], args2, envp);
+	//execve(paths[j], args2, envp);
+	//execve(paths2[j], args2, envp);
+
 
 	close (fd[0]);
 	close (fd[1]);
