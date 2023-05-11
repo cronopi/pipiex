@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main3.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/10 13:41:52 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/11 11:20:56 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,54 +18,105 @@
 # include <errno.h>
 # include "libft/libft.h"
 
-//debe utilizar 4 argumentos,
-// 2 archivos
-// 2 comandos
-// el programa debe recibir 2 comandos
-// debo recoger el prinmer comando
-// el comando de la izquierda del pipe(output) debe pasarse a la derecha del pipe(como imput) y realizar el comando con "ambos".
-// tengo que abrir el archivo leerlo y antes de salir del programa cerrarlo
-
-void ft_pipex()
+void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 {
+	int		fd[2];
+	pid_t	pid;
+	pid_t	pid2;
+	int		file_desc;
+	char	**paths;
+	char	*path;
+	char	*cmd;
+	char	**args;
+	char	**args2;
+	int		j;
+	int		test;
 
+	j = 0;
+
+	if (pipe(fd) == -1)
+	{
+		perror("Error al crear la tubería");
+		return ;
+	}
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("Error al crear el proceso padre-hijo\n");
+		return ;
+	}
+	else if (pid == 0)
+	{
+		file_desc = open(infile, O_RDONLY);
+		dup2(file_desc, STDIN_FILENO);
+		dup2(fd[1], STDOUT_FILENO);
+		close(fd[0]);
+	}
+
+	pid2 = fork();
+	if (pid2 < 0)
+	{
+		perror("Error al crear el proceso padre-hijo\n");
+		return ;
+	}
+	else if (pid2 == 0)
+	{
+		int file_desc = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		dup2(fd[0], STDIN_FILENO);
+		dup2(file_desc, STDOUT_FILENO);
+		close(fd[1]);
+	}
+
+	while(envp[j])
+	{
+		if (ft_strncmp(envp[j], "PATH=", 5) == 0)
+		{
+			path = ft_strdup(envp[j] + 5);
+			break;
+		}
+		j++;
+	}
+
+	paths = ft_split(path, ':');
+	args = ft_split(cmd1, ' ');
+	j = 0;
+	while (paths[j] != NULL)
+	{
+		cmd = ft_strjoin("/", args[0]);
+		paths[j] = ft_strjoin(paths[j], cmd);
+		if (access(paths[j], F_OK) == 0)
+			break;
+		//printf("esto que imprime %s\n", paths[j]);
+		j++;
+	}
+	//execve(paths[j], args, envp);
+
+	args2 = ft_split(cmd2, ' ');
+	j = 0;
+	while (paths[j] != NULL)
+	{
+		cmd2 = ft_strjoin("/", args2[0]);
+		paths[j] = ft_strjoin(paths[j], cmd2);
+		if (access(paths[j], F_OK) == 0)
+			break;
+		//printf("y lo otro que imprime %s\n", paths[j]);
+		j++;
+	}
+	execve(paths[j], args2, envp);
+
+	close (fd[0]);
+	close (fd[1]);
+	waitpid(pid, NULL, 0);
+	waitpid(pid2, NULL, 0);
 }
 
-int main (int argc, char **argv, char **envp) // ls -l
-{
-	if (argc == 1)
-	{
-		char	**paths;
-		char	*path;
-		char	*cmd;
-		char	**args;
-		char	carricoche[] = "ls -l -a";
-		int		j;
-		int		test;
 
-		j = 0;
-		args = ft_split(carricoche, ' ');
-		while(envp[j])
-		{
-			if (ft_strncmp(envp[j], "PATH=", 5) == 0)
-			{
-				path = ft_strdup(envp[j] + 5);
-				break;
-			}
-			j++;
-		}
-		j = 0;
-		paths = ft_split(path, ':');
-		while (paths[j] != NULL)
-		{
-			cmd = ft_strjoin("/", args[0]);
-			paths[j] = ft_strjoin(paths[j], cmd);
-			if (access(paths[j], F_OK) == 0)
-				break;
-			printf("esto que imprime muyayo%s\n", paths[j]);
-			j++;
-		}
-		execve(paths[j], args, envp);
+int main (int argc, char **argv, char **envp)
+{
+	if (argc == 5)
+	{
+		ft_pipex(argv[2], argv[3], envp, argv[1], argv[4]);
 	}
 	else
 		write(1, "error\n", 6);
