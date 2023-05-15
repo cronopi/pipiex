@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main3.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/11 11:29:32 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/05/11 18:39:17 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,44 +31,10 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 	char	**args;
 	char	**args2;
 	int		j;
+	int		i;
 	int		test;
 
 	j = 0;
-
-	if (pipe(fd) == -1)
-	{
-		perror("Error al crear la tubería");
-		return ;
-	}
-
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("Error al crear el proceso padre-hijo\n");
-		return ;
-	}
-	else if (pid == 0)
-	{
-		file_desc = open(infile, O_RDONLY);
-		dup2(file_desc, STDIN_FILENO);
-		dup2(fd[1], STDOUT_FILENO);
-		close(fd[0]);
-	}
-
-	pid2 = fork();
-	if (pid2 < 0)
-	{
-		perror("Error al crear el proceso padre-hijo\n");
-		return ;
-	}
-	else if (pid2 == 0)
-	{
-		int file_desc = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		dup2(fd[0], STDIN_FILENO);
-		dup2(file_desc, STDOUT_FILENO);
-		close(fd[1]);
-	}
-
 	while(envp[j])
 	{
 		if (ft_strncmp(envp[j], "PATH=", 5) == 0)
@@ -91,30 +57,61 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		//printf("esto que imprime %s\n", paths[j]);
 		j++;
 	}
-	//execve(paths[j], args, envp);
 
 	paths2 = ft_split(path, ':');
 	args2 = ft_split(cmd2, ' ');
-	j = 0;
-	while (paths2[j] != NULL)
+	i = 0;
+	while (paths2[i] != NULL)
 	{
 		cmd2 = ft_strjoin("/", args2[0]);
-		paths2[j] = ft_strjoin(paths2[j], cmd2);
-		if (access(paths2[j], F_OK) == 0)
+		paths2[i] = ft_strjoin(paths2[i], cmd2);
+		if (access(paths2[i], F_OK) == 0)
 			break;
 		//printf("y lo otro que imprime %s\n", paths[j]);
-		j++;
+		i++;
 	}
-	//execve(paths[j], args2, envp);
-	//execve(paths2[j], args2, envp);
 
+	if (pipe(fd) == -1)
+	{
+		perror("Error al crear la tubería");
+		return ;
+	}
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("Error al crear el proceso padre-hijo\n");
+		return ;
+	}
+	else if (pid == 0)
+	{
+		file_desc = open(infile, O_RDONLY);
+		dup2(file_desc, STDIN_FILENO);
+		dup2(fd[1], STDOUT_FILENO);
+		close(fd[0]);
+		execve(paths[j], args, envp);
+	}
+
+	pid2 = fork();
+	if (pid2 < 0)
+	{
+		perror("Error al crear el proceso padre-hijo\n");
+		return ;
+	}
+	else if (pid2 == 0)
+	{
+		int file_desc = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		dup2(fd[0], STDIN_FILENO);
+		dup2(file_desc, STDOUT_FILENO);
+		close(fd[1]);
+		execve(paths2[i], args2, envp);
+	}
 
 	close (fd[0]);
 	close (fd[1]);
 	waitpid(pid, NULL, 0);
 	waitpid(pid2, NULL, 0);
 }
-
 
 int main (int argc, char **argv, char **envp)
 {
