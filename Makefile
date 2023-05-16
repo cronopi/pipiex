@@ -7,7 +7,7 @@ FLAGS = -Wall -Wextra -Werror
 LIBFT= -L libft -lft
 
 NAME = pipex
-SRC = main.c
+SRC = main3.c
 
 OBJ = $(SRC:.c=.o)
 
