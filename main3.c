@@ -3,33 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   main3.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/16 11:35:49 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/05/19 18:40:33 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
 
-
-
-void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
+char *ft_check_command(char **envp, char *cmd1)
 {
-	int		fd[2];
-	pid_t	pid;
-	pid_t	pid2;
-	int		file_desc;
-	char	**paths;
-	char	**paths2;
-	char	*path;
-	char	*cmd;
-	char	**args;
-	char	**args2;
-	int		j;
-	int		i;
+	int j;
+	char *path;
+	char **paths;
+	char **args;
+	char *cmd;
 
 	j = 0;
+	path = NULL;
 	while(envp[j])
 	{
 		if (ft_strncmp(envp[j], "PATH=", 5) == 0)
@@ -38,6 +30,11 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 			break;
 		}
 		j++;
+	}
+	if (path == NULL)
+	{
+		perror("No 'PATH' environment variable found\n");
+		exit(1);
 	}
 	paths = ft_split(path, ':');
 	args = ft_split(cmd1, ' ');
@@ -48,29 +45,33 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		paths[j] = ft_strjoin(paths[j], cmd);
 		if (access(paths[j], F_OK) == 0)
 			break;
-		//printf("esto que imprime %s\n", paths[j]);
 		j++;
 		free(cmd);
 	}
-
-	paths2 = ft_split(path, ':');
-	args2 = ft_split(cmd2, ' ');
-	i = 0;
-	while (paths2[i] != NULL)
+	if (paths[j] == NULL)
 	{
-		cmd2 = ft_strjoin("/", args2[0]);
-		paths2[i] = ft_strjoin(paths2[i], cmd2);
-		if (access(paths2[i], F_OK) == 0)
-			break;
-		//printf("y lo otro que imprime %s\n", paths[j]);
-		i++;
-		free(cmd2);
+		perror("No such file or directory\n");
+		exit(1);
 	}
+	free(path);
+	return (paths[j]);
+}
+
+void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
+{
+	int		fd[2];
+	pid_t	pid;
+	int		file_desc;
+	char	*paths_cmd1;
+	char	*paths_cmd2;
+
+
 	if (pipe(fd) == -1)
 	{
 		perror("Error al crear la tubería");
 		exit (1);
 	}
+
 	pid = fork();
 	if (pid < 0)
 	{
@@ -88,41 +89,43 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		dup2(file_desc, STDIN_FILENO);
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[0]);
-		if (execve(paths[j], args, envp) == -1)
+		close(file_desc);
+		paths_cmd1 = ft_check_command(envp, cmd1);
+		if (execve(paths_cmd1, ft_split(cmd1, ' '), envp) == -1)
 		{
-			perror("Error al ejecutar execve\n");
-			exit (4);
+			/* perror("Error al ejecutar execve hijo\n");
+			exit (4); */
+			perror(strerror(errno));
+			exit (EXIT_FAILURE);
 		}
 	}
-	pid2 = fork();
-	if (pid2 < 0)
+	else if (pid > 0)
 	{
-		perror("Error al crear el proceso padre-hijo\n");
-		exit (5);
-	}
-	else if (pid2 == 0)
-	{
-		file_desc = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		waitpid(pid, NULL, WNOHANG);
+		file_desc = open(outfile, O_TRUNC | O_CREAT | O_RDWR, 0644);
 		if (file_desc < 0)
 		{
-			perror("Error al abrir el archivo\n");
-			exit (6);
+			perror(strerror(errno));
+			exit (5);
 		}
 		dup2(fd[0], STDIN_FILENO);
 		dup2(file_desc, STDOUT_FILENO);
 		close(fd[1]);
-		if (execve(paths2[i], args2, envp) == -1)
+		close(file_desc);
+		paths_cmd2 = ft_check_command(envp, cmd2);
+		if (execve(paths_cmd2, ft_split(cmd2, ' '), envp) == -1)
 		{
-			perror("Error al ejecutar execve\n");
-			exit (4);
+			/* perror("Error al ejecutar execve padre\n");
+			exit (4); */
+			perror(strerror(errno));
+			exit (EXIT_FAILURE);
 		}
 	}
 	close (fd[0]);
 	close (fd[1]);
 	waitpid(pid, NULL, 0);
-	waitpid(pid2, NULL, 0);
-	free(path);
-	exit (0);
+	//waitpid(pid2, NULL, 0);
+	exit (11);
 }
 
 int main (int argc, char **argv, char **envp)
@@ -136,5 +139,5 @@ int main (int argc, char **argv, char **envp)
 		write(1, "error\n", 6);
 		return (1);
 	}
-	return (0);
+	return (12);
 }
