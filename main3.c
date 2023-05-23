@@ -6,19 +6,51 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/19 18:40:33 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/23 16:25:03 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
 
+char **ft_split_in_two(char *cmd1) //  grep\0hello\0
+{
+	char **args;
+	char *tmp;
+	int i;
+	int j;
+
+	i = 0;
+	j = 1;
+	tmp = NULL;
+	args = malloc(sizeof(char*) * 3);
+	while(cmd1[i] != '\0')
+	{
+		if (cmd1[i] == ' ') // args[j] = ft_strdup(cmd1)
+		{
+			cmd1[i] = '\0';
+			tmp = &cmd1[i + 1];
+			break;
+		}
+		i++;
+	}
+	args[0] = ft_strdup(cmd1);
+	if (tmp != NULL)
+	{
+		args[1] = ft_strdup(tmp);
+		j++;
+		*(tmp - 1) = ' ';
+	}
+	args[j] = NULL;
+	return (args);
+}
+
 char *ft_check_command(char **envp, char *cmd1)
 {
-	int j;
-	char *path;
-	char **paths;
-	char **args;
-	char *cmd;
+	int		j;
+	char	*path;
+	char	**paths;
+	char	**args;
+	char	*cmd;
 
 	j = 0;
 	path = NULL;
@@ -33,11 +65,13 @@ char *ft_check_command(char **envp, char *cmd1)
 	}
 	if (path == NULL)
 	{
-		perror("No 'PATH' environment variable found\n");
-		exit(1);
+		path = ft_strdup("/bin:/usr/bin");
+		//perror("No 'PATH' environment variable found\n");
+		//exit(1);
 	}
 	paths = ft_split(path, ':');
-	args = ft_split(cmd1, ' ');
+	args = ft_split_in_two(cmd1);
+	//args = ft_split(cmd1, ' ');
 	j = 0;
 	while (paths[j] != NULL)
 	{
@@ -50,8 +84,10 @@ char *ft_check_command(char **envp, char *cmd1)
 	}
 	if (paths[j] == NULL)
 	{
-		perror("No such file or directory\n");
-		exit(1);
+		ft_putstr_fd("pipex: ", 2);
+		ft_putstr_fd(args[0], 2);
+		ft_putstr_fd(": command not found\n", 2);
+		exit(127);
 	}
 	free(path);
 	return (paths[j]);
@@ -83,7 +119,7 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		file_desc = open(infile, O_RDONLY);
 		if (file_desc < 0)
 		{
-			perror("Error al abrir el archivo\n");
+			perror("pipex: input");
 			exit (3);
 		}
 		dup2(file_desc, STDIN_FILENO);
@@ -91,12 +127,13 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[0]);
 		close(file_desc);
 		paths_cmd1 = ft_check_command(envp, cmd1);
+		//if (execve(paths_cmd1, ft_split_in_two(cmd1), envp) == -1)
 		if (execve(paths_cmd1, ft_split(cmd1, ' '), envp) == -1)
 		{
 			/* perror("Error al ejecutar execve hijo\n");
 			exit (4); */
 			perror(strerror(errno));
-			exit (EXIT_FAILURE);
+			exit (5);
 		}
 	}
 	else if (pid > 0)
@@ -113,12 +150,13 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[1]);
 		close(file_desc);
 		paths_cmd2 = ft_check_command(envp, cmd2);
+		//if (execve(paths_cmd2, ft_split_in_two(cmd2), envp) == -1)
 		if (execve(paths_cmd2, ft_split(cmd2, ' '), envp) == -1)
 		{
 			/* perror("Error al ejecutar execve padre\n");
 			exit (4); */
 			perror(strerror(errno));
-			exit (EXIT_FAILURE);
+			exit (5);
 		}
 	}
 	close (fd[0]);

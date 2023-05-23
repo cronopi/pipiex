@@ -1,0 +1,9 @@
+test:
+ls
+-l pipexMedic/
+
+tests:
+ls
+-l
+pipexMedic/
+

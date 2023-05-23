@@ -1,0 +1,8 @@
+total 28
+-rw-r--r-- 1 roberto roberto  707 May 19 18:43 README.md
+drwxr-xr-x 2 roberto roberto 4096 May 19 18:43 assets
+drwxr-xr-x 2 roberto roberto 4096 May 19 18:43 inc
+-rw-r--r-- 1 roberto roberto  229 May 23 15:18 output
+drwxr-xr-x 2 roberto roberto 4096 May 19 18:43 src
+-rwxr-xr-x 1 roberto roberto 2903 May 19 18:43 test.sh
+-rw-r--r-- 1 roberto roberto 3194 May 23 15:19 tester.log
