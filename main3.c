@@ -6,41 +6,82 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/23 16:25:03 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/25 15:24:55 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
 
-char **ft_split_in_two(char *cmd1) //  grep\0hello\0
+int ft_check_for_quotes(char *cmd1)
 {
-	char **args;
-	char *tmp;
-	int i;
-	int j;
+	int	i;
 
 	i = 0;
-	j = 1;
-	tmp = NULL;
-	args = malloc(sizeof(char*) * 3);
-	while(cmd1[i] != '\0')
+	while (cmd1[i])
 	{
-		if (cmd1[i] == ' ') // args[j] = ft_strdup(cmd1)
+		if (cmd1[i] == '\'' || cmd1[i] == '\"')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+char **ft_split_in_two(char *cmd1) // < input grep Hello | awk '{count++} END {print count}' > output
+{
+	char **args;
+	int	i;
+	int	j;
+	int	k;
+
+	i = 0;
+	j = 0;
+	k = 0;
+	if (ft_check_for_quotes(cmd1) == 0)
+	{
+		args = ft_split(cmd1, ' ');
+		return (args);
+	}
+	j = ft_strlen(cmd1);
+	while (i < j)
+	{
+		if (cmd1[i] == '\'')
 		{
+			i++;
+			while (cmd1[i] != '\'')
+				i++;
+		}
+		if (cmd1[i] == '\"')
+		{
+			i++;
+			while (cmd1[i] != '\"')
+				i++;
+		}
+		if (cmd1[i] == ' ')
 			cmd1[i] = '\0';
-			tmp = &cmd1[i + 1];
-			break;
+		k++;
+		i++;
+	}
+	args = malloc(sizeof(char *) * (k + 1));
+	i = 0;
+	while (i < j + 1)
+	{
+		if (cmd1[i] == '\0')
+		{
+			args[k] = ft_strdup(cmd1); // awk '{count++} END {print count}'
+			ft_putstr_fd(args[k], 2);
+			ft_putstr_fd("\n", 2);
+			k++;
 		}
 		i++;
 	}
-	args[0] = ft_strdup(cmd1);
-	if (tmp != NULL)
+	args[k] = NULL;
+	i = 0;
+	while (i < j)
 	{
-		args[1] = ft_strdup(tmp);
-		j++;
-		*(tmp - 1) = ' ';
+		if (cmd1[i] == '\0')
+			cmd1[i] = ' ';
+		i++;
 	}
-	args[j] = NULL;
 	return (args);
 }
 
@@ -64,14 +105,9 @@ char *ft_check_command(char **envp, char *cmd1)
 		j++;
 	}
 	if (path == NULL)
-	{
 		path = ft_strdup("/bin:/usr/bin");
-		//perror("No 'PATH' environment variable found\n");
-		//exit(1);
-	}
 	paths = ft_split(path, ':');
 	args = ft_split_in_two(cmd1);
-	//args = ft_split(cmd1, ' ');
 	j = 0;
 	while (paths[j] != NULL)
 	{
@@ -127,11 +163,8 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[0]);
 		close(file_desc);
 		paths_cmd1 = ft_check_command(envp, cmd1);
-		//if (execve(paths_cmd1, ft_split_in_two(cmd1), envp) == -1)
-		if (execve(paths_cmd1, ft_split(cmd1, ' '), envp) == -1)
+		if (execve(paths_cmd1, ft_split_in_two(cmd1), envp) == -1)
 		{
-			/* perror("Error al ejecutar execve hijo\n");
-			exit (4); */
 			perror(strerror(errno));
 			exit (5);
 		}
@@ -150,11 +183,8 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[1]);
 		close(file_desc);
 		paths_cmd2 = ft_check_command(envp, cmd2);
-		//if (execve(paths_cmd2, ft_split_in_two(cmd2), envp) == -1)
-		if (execve(paths_cmd2, ft_split(cmd2, ' '), envp) == -1)
+		if (execve(paths_cmd2, ft_split_in_two(cmd2), envp) == -1)
 		{
-			/* perror("Error al ejecutar execve padre\n");
-			exit (4); */
 			perror(strerror(errno));
 			exit (5);
 		}
