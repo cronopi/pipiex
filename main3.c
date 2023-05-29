@@ -6,7 +6,7 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/05/25 15:24:55 by roberto          ###   ########.fr       */
+/*   Updated: 2023/05/29 15:44:20 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,12 @@ char **ft_split_in_two(char *cmd1) // < input grep Hello | awk '{count++} END {p
 	int	i;
 	int	j;
 	int	k;
+	int	l;
 
 	i = 0;
 	j = 0;
 	k = 0;
+	l = 0;
 	if (ft_check_for_quotes(cmd1) == 0)
 	{
 		args = ft_split(cmd1, ' ');
@@ -63,14 +65,17 @@ char **ft_split_in_two(char *cmd1) // < input grep Hello | awk '{count++} END {p
 	}
 	args = malloc(sizeof(char *) * (k + 1));
 	i = 0;
+	k = 0;
 	while (i < j + 1)
 	{
 		if (cmd1[i] == '\0')
 		{
-			args[k] = ft_strdup(cmd1); // awk '{count++} END {print count}'
-			ft_putstr_fd(args[k], 2);
-			ft_putstr_fd("\n", 2);
+			if (l == 0)
+				args[k] = ft_strdup(cmd1); // awk '{count++} END {print count}'
+			else
+				args[k] = ft_strdup(cmd1 + l);
 			k++;
+			l = i + 1;
 		}
 		i++;
 	}
@@ -81,6 +86,12 @@ char **ft_split_in_two(char *cmd1) // < input grep Hello | awk '{count++} END {p
 		if (cmd1[i] == '\0')
 			cmd1[i] = ' ';
 		i++;
+	}
+	k = 0;
+	while (args[k])
+	{
+		args[k] = ft_strtrim(args[k], "\'\"");
+		k++;
 	}
 	return (args);
 }
