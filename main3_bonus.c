@@ -1,29 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main3.c                                            :+:      :+:    :+:   */
+/*   main3_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/06/05 14:32:50 by roberto          ###   ########.fr       */
+/*   Updated: 2023/06/05 13:29:59 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
-
-void	ft_free_paths(char **paths)
-{
-	int	i;
-
-	i = 0;
-	while (paths[i])
-	{
-		free(paths[i]);
-		i++;
-	}
-	free(paths);
-}
 
 int ft_check_for_quotes(char *cmd1)
 {
@@ -39,7 +26,7 @@ int ft_check_for_quotes(char *cmd1)
 	return (0);
 }
 
-char **ft_split_in_two(char *cmd1)
+char **ft_split_in_two(char *cmd1) // < input grep Hello | awk '{count++} END {print count}' > output
 {
 	char **args;
 	int	i;
@@ -116,12 +103,9 @@ char *ft_check_command(char **envp, char *cmd1)
 	char	**paths;
 	char	**args;
 	char	*cmd;
-	char	*test;
 
 	j = 0;
 	path = NULL;
-	test = NULL;
-	cmd = NULL;
 	while(envp[j])
 	{
 		if (ft_strncmp(envp[j], "PATH=", 5) == 0)
@@ -134,35 +118,26 @@ char *ft_check_command(char **envp, char *cmd1)
 	if (path == NULL)
 		path = ft_strdup("/bin:/usr/bin");
 	paths = ft_split(path, ':');
- 	free(path);
 	args = ft_split_in_two(cmd1);
 	j = 0;
-	while (paths[j])
+	while (paths[j] != NULL)
 	{
 		cmd = ft_strjoin("/", args[0]);
-		test = ft_strjoin(paths[j], cmd);
-		free(cmd);
-		cmd = NULL;
-		if (access(test, F_OK) == 0)
+		paths[j] = ft_strjoin(paths[j], cmd);
+		if (access(paths[j], F_OK) == 0)
 			break;
 		j++;
-		free(test);
-		test = NULL;
+		free(cmd);
 	}
 	if (paths[j] == NULL)
 	{
-		free(test);
 		ft_putstr_fd("pipex: ", 2);
 		ft_putstr_fd(args[0], 2);
 		ft_putstr_fd(": command not found\n", 2);
-		ft_free_paths(args);
-		ft_free_paths(paths);
 		exit(127);
 	}
-	cmd = ft_strdup(test);
-	ft_free_paths(paths);
-	free(test);
-	ft_free_paths(args);
+
+	free(path);
 	return (cmd);
 }
 
@@ -173,13 +148,14 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 	int		file_desc;
 	char	*paths_cmd1;
 	char	*paths_cmd2;
-	char	**args;
+
 
 	if (pipe(fd) == -1)
 	{
 		perror("Error al crear la tubería");
 		exit (1);
 	}
+
 	pid = fork();
 	if (pid < 0)
 	{
@@ -199,13 +175,9 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[0]);
 		close(file_desc);
 		paths_cmd1 = ft_check_command(envp, cmd1);
-		args = ft_split_in_two(cmd1);
-		if (execve(paths_cmd1, args, envp) == -1)
+		if (execve(paths_cmd1, ft_split_in_two(cmd1), envp) == -1)
 		{
 			perror(strerror(errno));
-			ft_free_paths(args);
-			free(paths_cmd1);
-	close (fd[1]);
 			exit (5);
 		}
 	}
@@ -223,26 +195,42 @@ void	ft_pipex(char *cmd1, char *cmd2, char **envp, char *infile, char *outfile)
 		close(fd[1]);
 		close(file_desc);
 		paths_cmd2 = ft_check_command(envp, cmd2);
-		args = ft_split_in_two(cmd2);
-		if (execve(paths_cmd2, args, envp) == -1)
+		if (execve(paths_cmd2, ft_split_in_two(cmd2), envp) == -1)
 		{
 			perror(strerror(errno));
-			ft_free_paths(args);
-			free(paths_cmd2);
-	close (fd[0]);
 			exit (5);
 		}
 	}
 	close (fd[0]);
 	close (fd[1]);
 	waitpid(pid, NULL, 0);
+	exit (11);
 }
 
 int main (int argc, char **argv, char **envp)
 {
-	if (argc == 5)
+/*
+	while (i < argc - 1) //  argc == 6 - 1
 	{
-		ft_pipex(argv[2], argv[3], envp, argv[1], argv[4]);
+		if ((i + 1) == (argc - 1))
+			break ;
+		ft_putstr_fd(argv[i], 1);
+		ft_putstr_fd(" ", 1);
+		ft_putstr_fd(argv[i + 1], 1);
+		ft_putstr_fd("\n", 1);
+		i++;
+	} */
+	int i;
+
+	i = 2;
+	if (argc >= 5)
+	{
+		while (i < argc - 1)
+		{
+			ft_pipex(argv[i], argv[i + 1], envp, argv[1], argv[argc - 1]);
+			i++;
+		}
+		//ft_pipex(argv[2], argv[3], argv[4], argv[5] envp, argv[1], argv[argc - 1]);
 	}
 	else
 	{
