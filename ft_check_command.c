@@ -13,6 +13,29 @@ void	ft_paths_is_null(char **paths, int j, char **args, char *test)
 		exit(127);
 	}
 }
+
+int	ft_path_cmd( char **paths, char **args, char **test)
+{
+	int j;
+	char *cmd;
+
+	j = 0;
+	cmd = NULL;
+	while (paths[j])
+	{
+		cmd = ft_strjoin("/", args[0]);
+		*test = ft_strjoin(paths[j], cmd);
+		free(cmd);
+		cmd = NULL;
+		if (access(*test, F_OK) == 0)
+			break;
+		j++;
+		free(*test);
+		*test = NULL;
+	}
+	return (j);
+}
+
 char **split_path(char **paths, char **envp)
 {
 	char	*path;
@@ -50,18 +73,7 @@ char *ft_check_command(char **envp, char *cmd1)
 	paths = NULL;
 	paths = split_path(paths, envp);
 	args = ft_split_in_two(cmd1);
-	while (paths[j])
-	{
-		cmd = ft_strjoin("/", args[0]);
-		test = ft_strjoin(paths[j], cmd);
-		free(cmd);
-		cmd = NULL;
-		if (access(test, F_OK) == 0)
-			break;
-		j++;
-		free(test);
-		test = NULL;
-	}
+	j = ft_path_cmd(paths, args, &test);
 	ft_paths_is_null(paths, j, args, test);
 	cmd = ft_strdup(test);
 	ft_free_paths(paths);

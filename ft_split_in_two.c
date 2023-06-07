@@ -25,7 +25,7 @@ void	ft_quote_duplicate(char *cmd1, char **args, int j)
 	args[k] = NULL;
 }
 
-char	**ft_quote_string(char *cmd1, int j)
+char	**ft_quote_string(char *cmd1, int j) // 25 lineas
 {
 	int	i;
 	int	k;
@@ -35,25 +35,18 @@ char	**ft_quote_string(char *cmd1, int j)
 	k = 0;
 	while (i < j)
 	{
-		if (cmd1[i] == '\'')
-		{
-			i++;
+		if (cmd1[i] == '\'' && i++)
 			while (cmd1[i] != '\'')
 				i++;
-		}
-		if (cmd1[i] == '\"')
-		{
-			i++;
+		if (cmd1[i] == '\"' && i++)
 			while (cmd1[i] != '\"')
 				i++;
-		}
 		if (cmd1[i] == ' ')
 			cmd1[i] = '\0';
 		k++;
 		i++;
 	}
-	args = malloc(sizeof(char *) * (k + 1));
-	return (args);
+	return (args = malloc(sizeof(char *) * (k + 1)));
 }
 
 char **ft_split_in_two(char *cmd1)
@@ -73,16 +66,9 @@ char **ft_split_in_two(char *cmd1)
 	}
 	args = ft_quote_string(cmd1, j);
 	ft_quote_duplicate(cmd1, args, j);
-	while (i < j)
-	{
+	while (++i < j)
 		if (cmd1[i] == '\0')
 			cmd1[i] = ' ';
-		i++;
-	}
-	/* 	while (++i < j)
-		if (cmd1[i] == '\0')
-			cmd1[i] = ' '; */
-
 	while (args[k])
 	{
 		args[k] = ft_strtrim(args[k], "\'\"");
