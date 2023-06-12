@@ -6,7 +6,7 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/06/07 18:00:21 by roberto          ###   ########.fr       */
+/*   Updated: 2023/06/12 14:47:57 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,9 @@ void	ft_parents_proccess(char *cmd2, char **envp, char *outfile, int fd[2])
 
 void	ft_child_proccess(char *cmd1, char **envp, char *infile, int fd[2])
 {
-	int file_desc;
-	char *paths_cmd1;
-	char **args;
+	int		file_desc;
+	char	*paths_cmd1;
+	char	**args;
 
 	file_desc = open(infile, O_RDONLY);
 	if (file_desc < 0)
@@ -96,12 +96,10 @@ void	ft_pipex(char **argv, char **envp)
 	waitpid(pid, NULL, 0);
 }
 
-int main (int argc, char **argv, char **envp)
+int	main(int argc, char **argv, char **envp)
 {
 	if (argc == 5)
-	{
 		ft_pipex(argv, envp);
-	}
 	else
 	{
 		write(1, "error\n", 6);

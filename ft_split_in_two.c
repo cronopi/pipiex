@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split_in_two.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/06/12 14:50:08 by roberto           #+#    #+#             */
+/*   Updated: 2023/06/12 14:50:09 by roberto          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_pipex.h"
 
 void	ft_quote_duplicate(char *cmd1, char **args, int j)
@@ -14,7 +26,7 @@ void	ft_quote_duplicate(char *cmd1, char **args, int j)
 		if (cmd1[i] == '\0')
 		{
 			if (l == 0)
-				args[k] = ft_strdup(cmd1); // awk '{count++} END {print count}'
+				args[k] = ft_strdup(cmd1);
 			else
 				args[k] = ft_strdup(cmd1 + l);
 			k++;
@@ -25,11 +37,11 @@ void	ft_quote_duplicate(char *cmd1, char **args, int j)
 	args[k] = NULL;
 }
 
-char	**ft_quote_string(char *cmd1, int j) // 25 lineas
+char	**ft_quote_string(char *cmd1, int j)
 {
-	int	i;
-	int	k;
-	char **args;
+	int		i;
+	int		k;
+	char	**args;
 
 	i = 0;
 	k = 0;
@@ -49,12 +61,12 @@ char	**ft_quote_string(char *cmd1, int j) // 25 lineas
 	return (args = malloc(sizeof(char *) * (k + 1)));
 }
 
-char **ft_split_in_two(char *cmd1)
+char	**ft_split_in_two(char *cmd1)
 {
-	char **args;
-	int	i;
-	int	j;
-	int	k;
+	char	**args;
+	int		i;
+	int		j;
+	int		k;
 
 	i = 0;
 	k = 0;

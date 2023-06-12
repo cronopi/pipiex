@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_check_command.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/06/12 14:48:31 by roberto           #+#    #+#             */
+/*   Updated: 2023/06/12 14:51:45 by roberto          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_pipex.h"
 
 void	ft_paths_is_null(char **paths, int j, char **args, char *test)
@@ -16,8 +28,8 @@ void	ft_paths_is_null(char **paths, int j, char **args, char *test)
 
 int	ft_path_cmd( char **paths, char **args, char **test)
 {
-	int j;
-	char *cmd;
+	int		j;
+	char	*cmd;
 
 	j = 0;
 	cmd = NULL;
@@ -28,7 +40,7 @@ int	ft_path_cmd( char **paths, char **args, char **test)
 		free(cmd);
 		cmd = NULL;
 		if (access(*test, F_OK) == 0)
-			break;
+			break ;
 		j++;
 		free(*test);
 		*test = NULL;
@@ -36,30 +48,30 @@ int	ft_path_cmd( char **paths, char **args, char **test)
 	return (j);
 }
 
-char **split_path(char **paths, char **envp)
+char	**split_path(char **paths, char **envp)
 {
 	char	*path;
 	int		j;
 
 	j = 0;
 	path = NULL;
-	while(envp[j])
+	while (envp[j])
 	{
 		if (ft_strncmp(envp[j], "PATH=", 5) == 0)
 		{
 			path = ft_strdup(envp[j] + 5);
-			break;
+			break ;
 		}
 		j++;
 	}
 	if (path == NULL)
 		path = ft_strdup("/bin:/usr/bin");
 	paths = ft_split(path, ':');
- 	free(path);
- 	return (paths);
+	free(path);
+	return (paths);
 }
 
-char *ft_check_command(char **envp, char *cmd1)
+char	*ft_check_command(char **envp, char *cmd1)
 {
 	int		j;
 	char	**paths;
