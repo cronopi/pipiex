@@ -6,19 +6,18 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 14:14:13 by roberto           #+#    #+#             */
-/*   Updated: 2023/06/07 17:49:08 by roberto          ###   ########.fr       */
+/*   Updated: 2023/06/07 18:00:21 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
 
-void	ft_parents_proccess(char *cmd2, char **envp, char *outfile, int fd[2], pid_t pid) // 4 argumentos
+void	ft_parents_proccess(char *cmd2, char **envp, char *outfile, int fd[2])
 {
 	int		file_desc;
 	char	*paths_cmd2;
 	char	**args;
 
-	waitpid(pid, NULL, WNOHANG);
 	file_desc = open(outfile, O_TRUNC | O_CREAT | O_RDWR, 0644);
 	if (file_desc < 0)
 	{
@@ -88,7 +87,10 @@ void	ft_pipex(char **argv, char **envp)
 	else if (pid == 0)
 		ft_child_proccess(argv[2], envp, argv[1], fd);
 	else if (pid > 0)
-		ft_parents_proccess(argv[3], envp, argv[4], fd, pid);
+	{
+		waitpid(pid, NULL, WNOHANG);
+		ft_parents_proccess(argv[3], envp, argv[4], fd);
+	}
 	close (fd[0]);
 	close (fd[1]);
 	waitpid(pid, NULL, 0);
