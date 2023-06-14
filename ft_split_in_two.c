@@ -6,11 +6,27 @@
 /*   By: roberto <roberto@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 14:50:08 by roberto           #+#    #+#             */
-/*   Updated: 2023/06/12 14:50:09 by roberto          ###   ########.fr       */
+/*   Updated: 2023/06/14 14:26:25 by roberto          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_pipex.h"
+
+void	ft_quote_trim(char **args, int k )
+{
+	char	*tmp;
+
+	tmp = NULL;
+	if (args[k][0] == '\'')
+		tmp = ft_strtrim(args[k], "\'");
+	else if (args[k][0] == '\"')
+		tmp = ft_strtrim(args[k], "\"");
+	if (tmp)
+	{
+		free(args[k]);
+		args[k] = tmp;
+	}
+}
 
 void	ft_quote_duplicate(char *cmd1, char **args, int j)
 {
@@ -29,6 +45,7 @@ void	ft_quote_duplicate(char *cmd1, char **args, int j)
 				args[k] = ft_strdup(cmd1);
 			else
 				args[k] = ft_strdup(cmd1 + l);
+			ft_quote_trim(args, k);
 			k++;
 			l = i + 1;
 		}
@@ -66,10 +83,8 @@ char	**ft_split_in_two(char *cmd1)
 	char	**args;
 	int		i;
 	int		j;
-	int		k;
 
 	i = 0;
-	k = 0;
 	j = ft_strlen(cmd1);
 	if (ft_check_for_quotes(cmd1) == 0)
 	{
@@ -81,10 +96,5 @@ char	**ft_split_in_two(char *cmd1)
 	while (++i < j)
 		if (cmd1[i] == '\0')
 			cmd1[i] = ' ';
-	while (args[k])
-	{
-		args[k] = ft_strtrim(args[k], "\'\"");
-		k++;
-	}
 	return (args);
 }
